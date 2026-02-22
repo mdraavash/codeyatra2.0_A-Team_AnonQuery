@@ -14,7 +14,34 @@ const getBaseUrl = () => {
 export const API_BASE_URL = getBaseUrl();
 
 export const API = {
+  // Auth
   LOGIN: `${API_BASE_URL}/auth/login`,
   REGISTER: `${API_BASE_URL}/auth/register`,
   ME: `${API_BASE_URL}/auth/me`,
+
+  // Subjects
+  SUBJECTS: `${API_BASE_URL}/courses`,
+  TEACHING_SUBJECTS: `${API_BASE_URL}/courses/teaching`,
+
+  // Queries
+  QUERIES: `${API_BASE_URL}/queries`,
+  QUERIES_COURSE: (courseId: string) => `${API_BASE_URL}/queries/course/${courseId}`,
+  QUERIES_COURSE_ANSWERED: (courseId: string) => `${API_BASE_URL}/queries/course/${courseId}/answered`,
+  QUERIES_COURSE_FAQ: (courseId: string) => `${API_BASE_URL}/queries/course/${courseId}/faq`,
+  FAQ_ALL: `${API_BASE_URL}/queries/faq/all`,
+  QUERIES_TEACHER: `${API_BASE_URL}/queries/teacher`,
+  QUERIES_TEACHER_PENDING: `${API_BASE_URL}/queries/teacher/pending`,
+  QUERY_ANSWER: (queryId: string) => `${API_BASE_URL}/queries/${queryId}/answer`,
+  TEACHER_COURSE_STUDENTS: (courseId: string) => `${API_BASE_URL}/queries/teacher/course/${courseId}/students`,
+  TEACHER_STUDENT_QUERIES: (courseId: string, studentId: string) => `${API_BASE_URL}/queries/teacher/course/${courseId}/student/${studentId}`,
+
+  // Notifications
+  NOTIFICATIONS: `${API_BASE_URL}/queries/notifications`,
+  NOTIFICATION_READ: (notifId: string) => `${API_BASE_URL}/queries/notifications/${notifId}/read`,
+
+  // Admin
+  ADMIN_TEACHERS: `${API_BASE_URL}/admin/teachers`,
+  ADMIN_DELETE_TEACHER: (teacherId: string) => `${API_BASE_URL}/admin/teachers/${teacherId}`,
+  ADMIN_SUBJECTS: `${API_BASE_URL}/admin/subjects`,
+  ADMIN_DELETE_SUBJECT: (subjectId: string) => `${API_BASE_URL}/admin/subjects/${subjectId}`,
 };

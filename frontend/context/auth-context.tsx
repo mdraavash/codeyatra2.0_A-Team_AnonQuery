@@ -7,6 +7,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  roll: string;
   role: 'admin' | 'student' | 'teacher';
 }
 

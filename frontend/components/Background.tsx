@@ -24,7 +24,7 @@ export function Background({ children }: BackgroundProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0EDEE',
+    backgroundColor: '#2F2F2F',
   },
   image: {
     ...StyleSheet.absoluteFillObject,

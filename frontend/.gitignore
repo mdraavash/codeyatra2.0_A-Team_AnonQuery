@@ -31,7 +31,6 @@ yarn-error.*
 *.pem
 
 (admin)
-(teacher)
 
 # local env files
 .env*.local
