@@ -108,7 +108,7 @@ export default function TeacherHome() {
           ))
         )}
 
-        {/* Taught Courses */}
+        
         <Text style={styles.sectionTitle}>Taught Courses</Text>
         {subjects.length === 0 ? (
           <Text style={styles.emptyText}>No courses assigned yet</Text>

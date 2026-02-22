@@ -103,6 +103,12 @@ async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(ge
         "created_at": now,
     })
 
+    # remove the teacher's notification for this query
+    await db["notifications"].delete_many({
+        "user_id": str(current_user["_id"]),
+        "query_id": query_id,
+    })
+
     updated = await db["queries"].find_one({"_id": ObjectId(query_id)})
     return _query_doc(updated)
 
@@ -146,6 +152,19 @@ async def all_faq(current_user=Depends(get_current_user)):
     queries = await db["queries"].find(
         {"answered": True}
     ).sort("answered_at", -1).to_list(200)
+    return [_query_doc(q) for q in queries]
+
+
+# all queries asked by the current student
+@router.get("/mine", response_model=list[QueryResponse])
+async def my_queries(current_user=Depends(get_current_user)):
+    if current_user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can view their queries")
+    db = get_database()
+    student_id = str(current_user["_id"])
+    queries = await db["queries"].find(
+        {"student_id": student_id}
+    ).sort("created_at", -1).to_list(200)
     return [_query_doc(q) for q in queries]
 
 

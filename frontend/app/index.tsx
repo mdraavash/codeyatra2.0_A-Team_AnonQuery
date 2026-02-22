@@ -1,5 +1,5 @@
-import { StyleSheet, Image } from 'react-native';
-import React, { useEffect } from 'react';
+import { StyleSheet, Image, Animated, Easing } from 'react-native';
+import React, { useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
@@ -8,8 +8,18 @@ const Index = () => {
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
+  const translateY = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    if (isLoading) return; 
+    // Start animation
+    Animated.timing(translateY, {
+      toValue: -150, // 👈 how far upward it moves
+      duration: 1000,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }).start();
+
+    if (isLoading) return;
 
     if (user) {
       switch (user.role) {
@@ -27,17 +37,20 @@ const Index = () => {
 
     const timeout = setTimeout(() => {
       router.replace('/login');
-    }, 1500);
+    }, 3000);
 
     return () => clearTimeout(timeout);
-  
+
   }, [isLoading]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image
-        source={require('@/assets/images/EduLytics.png')}
-        style={styles.logo}
+      <Animated.Image
+        source={require('@/assets/images/logo.png')}
+        style={[
+          styles.logo,
+          { transform: [{ translateY }] }
+        ]}
       />
     </SafeAreaView>
   );
@@ -48,13 +61,14 @@ export default Index;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2F2F2F',
   },
 
   logo: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 100,
     resizeMode: 'contain',
   },
-})
+});

@@ -29,6 +29,7 @@ export const API = {
   QUERIES_COURSE_ANSWERED: (courseId: string) => `${API_BASE_URL}/queries/course/${courseId}/answered`,
   QUERIES_COURSE_FAQ: (courseId: string) => `${API_BASE_URL}/queries/course/${courseId}/faq`,
   FAQ_ALL: `${API_BASE_URL}/queries/faq/all`,
+  MY_QUERIES: `${API_BASE_URL}/queries/mine`,
   QUERIES_TEACHER: `${API_BASE_URL}/queries/teacher`,
   QUERIES_TEACHER_PENDING: `${API_BASE_URL}/queries/teacher/pending`,
   QUERY_ANSWER: (queryId: string) => `${API_BASE_URL}/queries/${queryId}/answer`,

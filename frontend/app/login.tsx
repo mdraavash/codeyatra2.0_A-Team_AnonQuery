@@ -1,7 +1,17 @@
-import { Background } from '@/components/Background';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Image,
+  Animated,
+  Easing,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 
 export default function LoginPage() {
@@ -9,6 +19,50 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+
+  const logoTranslateY = useRef(new Animated.Value(0)).current;
+  const formOpacity = useRef(new Animated.Value(0)).current;
+  const formTranslateY = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+  Animated.sequence([
+
+    Animated.timing(logoTranslateY, {
+      toValue: -50,
+      duration: 600,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }),
+    
+    Animated.delay(800),
+
+    
+    Animated.timing(logoTranslateY, {
+      toValue: -80,
+      duration: 700,
+      easing: Easing.out(Easing.exp),
+      useNativeDriver: true,
+    }),
+
+    
+    Animated.delay(200),
+
+    Animated.parallel([
+      Animated.timing(formOpacity, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(formTranslateY, {
+        toValue: 0,
+        duration: 600,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: true,
+      }),
+    ]),
+  ]).start();
+}, []);
+
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -27,48 +81,75 @@ export default function LoginPage() {
   };
 
   return (
-    <Background>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.inner}>
-          <Text style={styles.title}>Login</Text>
+    <SafeAreaView style={styles.container}>
+      
+      {/* Animated Logo */}
+      <Animated.Image
+        source={require('@/assets/images/logo.png')}
+        style={[
+          styles.logo,
+          { transform: [{ translateY: logoTranslateY }] },
+        ]}
+        resizeMode="contain"
+      />
 
-          <Text style={styles.name}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+      {/* Animated Form */}
+      <Animated.View
+        style={[
+          styles.inner,
+          {
+            opacity: formOpacity,
+            transform: [{ translateY: formTranslateY }],
+          },
+        ]}
+      >
+        <Text style={styles.title}>Login</Text>
 
-          <Text style={styles.name}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+        <Text style={styles.name}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your email"
+          placeholderTextColor="rgba(255,255,255,0.6)"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-          <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Login</Text>
-            )}
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    </Background>
+        <Text style={styles.name}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="rgba(255,255,255,0.6)"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </Pressable>
+      </Animated.View>
+
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#2F2F2F',
     flex: 1,
     justifyContent: 'center',
     padding: 20,
+  },
+  logo: {
+    width: '100%',
+    height: 100,
+    marginBottom: 40,
   },
   inner: {
     gap: 12,
@@ -83,7 +164,6 @@ const styles = StyleSheet.create({
   name: {
     color: '#FFFFFF',
   },
-
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -100,13 +180,5 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#2F2F2F',
-  },
-  signupRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 15,
-  },
-  link: {
-    fontWeight: 'bold',
   },
 });

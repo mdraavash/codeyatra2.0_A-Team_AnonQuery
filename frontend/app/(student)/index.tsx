@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { API } from '@/constants/api';
 import { useFocusEffect } from '@react-navigation/native';
 
-type TabName = 'home' | 'faq' | 'notifications';
+type TabName = 'home' | 'faq' | 'myqueries' | 'notifications';
 
 interface Subject {
   id: string;
@@ -41,6 +41,15 @@ interface FAQ {
   student_name: string;
 }
 
+interface MyQuery {
+  id: string;
+  question: string;
+  answer: string | null;
+  answered: boolean;
+  course_name: string;
+  created_at: string;
+}
+
 export default function StudentHome() {
   const { user, token, logout } = useAuth();
   const router = useRouter();
@@ -48,20 +57,23 @@ export default function StudentHome() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [myQueries, setMyQueries] = useState<MyQuery[]>([]);
   const [loading, setLoading] = useState(true);
 
   const headers = { Authorization: `Bearer ${token}` };
 
   const fetchData = async () => {
     try {
-      const [coursesRes, notifsRes, faqsRes] = await Promise.all([
+      const [coursesRes, notifsRes, faqsRes, myQRes] = await Promise.all([
         fetch(API.SUBJECTS, { headers }),
         fetch(API.NOTIFICATIONS, { headers }),
         fetch(API.FAQ_ALL, { headers }),
+        fetch(API.MY_QUERIES, { headers }),
       ]);
       if (coursesRes.ok) setSubjects(await coursesRes.json());
       if (notifsRes.ok) setNotifications(await notifsRes.json());
       if (faqsRes.ok) setFaqs(await faqsRes.json());
+      if (myQRes.ok) setMyQueries(await myQRes.json());
     } catch {
 
     } finally {
@@ -182,7 +194,38 @@ export default function StudentHome() {
     </>
   );
 
-  /* ──────── Notifications Tab ──────── */
+
+  const renderMyQueries = () => (
+    <>
+      <View style={styles.introCard}>
+        <Text style={styles.userName}>My Queries</Text>
+        <Text style={styles.userId}>All questions you&apos;ve asked</Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Your Questions</Text>
+      {myQueries.length === 0 ? (
+        <Text style={styles.emptyText}>You haven&apos;t asked any questions yet</Text>
+      ) : (
+        myQueries.map((q) => (
+          <View key={q.id} style={styles.faqCard}>
+            <View style={styles.faqHeader}>
+              <Text style={styles.faqBadge}>{q.course_name}</Text>
+              <View style={[styles.queryStatusBadge, q.answered ? styles.queryAnswered : styles.queryPending]}>
+                <Text style={styles.queryStatusText}>{q.answered ? 'Answered' : 'Pending'}</Text>
+              </View>
+            </View>
+            <Text style={styles.faqQuestion} numberOfLines={2}>{q.question}</Text>
+            {q.answered && q.answer ? (
+              <Text style={styles.faqAnswer} numberOfLines={3}>{q.answer}</Text>
+            ) : (
+              <Text style={[styles.faqAnswer, { fontStyle: 'italic' }]}>Awaiting response...</Text>
+            )}
+          </View>
+        ))
+      )}
+    </>
+  );
+
   const renderNotifications = () => (
     <>
       <View style={styles.introCard}>
@@ -224,6 +267,7 @@ export default function StudentHome() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {tab === 'home' && renderHome()}
         {tab === 'faq' && renderFAQ()}
+        {tab === 'myqueries' && renderMyQueries()}
         {tab === 'notifications' && renderNotifications()}
       </ScrollView>
 
@@ -241,8 +285,11 @@ export default function StudentHome() {
         >
           <Ionicons name="chatbox-outline" size={22} color={tab === 'faq' ? '#000' : '#FFF'} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="time-outline" size={22} color="#FFF" />
+        <TouchableOpacity
+          style={[styles.navItem, tab === 'myqueries' && styles.navItemActive]}
+          onPress={() => setTab('myqueries')}
+        >
+          <Ionicons name="time-outline" size={22} color={tab === 'myqueries' ? '#000' : '#FFF'} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.navItem, tab === 'notifications' && styles.navItemActive]}
@@ -418,6 +465,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoutText: { fontSize: 16, fontWeight: '600', color: '#FFF' },
+
+  /* Query Status Badge */
+  queryStatusBadge: {
+    marginLeft: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  queryAnswered: { backgroundColor: '#2ecc71' },
+  queryPending: { backgroundColor: '#e67e22' },
+  queryStatusText: { fontSize: 11, fontWeight: '600', color: '#FFF' },
 
   /* Bottom Nav */
   navBar: {
