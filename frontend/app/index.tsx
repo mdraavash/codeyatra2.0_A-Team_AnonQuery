@@ -9,7 +9,7 @@ const Index = () => {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (isLoading) return; // wait for auth to load
+    if (isLoading) return; 
 
     if (user) {
       switch (user.role) {
@@ -25,13 +25,12 @@ const Index = () => {
       }
     }
 
-    // No session — go to login after a brief splash
     const timeout = setTimeout(() => {
       router.replace('/login');
     }, 1500);
 
     return () => clearTimeout(timeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [isLoading]);
 
   return (
@@ -50,6 +49,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: '#2F2F2F',
   },
 
   logo: {

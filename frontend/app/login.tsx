@@ -78,28 +78,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#0D152D',
+    color: '#FFFFFF',
   },
   name: {
-    color: '#0D152D',
+    color: '#FFFFFF',
   },
 
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    color: '#0D152D',
+    color: '#FFFFFF',
     padding: 15,
     borderRadius: 6,
   },
   button: {
     marginTop: 10,
-    backgroundColor: '#0D152D',
+    backgroundColor: '#FFFFFF',
     padding: 12,
     borderRadius: 6,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#2F2F2F',
   },
   signupRow: {
     flexDirection: 'row',
