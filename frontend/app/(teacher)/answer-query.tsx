@@ -43,9 +43,10 @@ export default function AnswerQuery() {
         body: JSON.stringify({ answer: trimmed }),
       });
       if (res.ok) {
-        Alert.alert('Success', 'Answer submitted! The student will be notified.', [
-          { text: 'OK', onPress: () => router.back() },
+        Alert.alert('Success', 'Query replied successfully!', [
+          { text: 'OK', onPress: () => router.replace('/(teacher)/' as never) },
         ]);
+        return;
       } else {
         const data = await res.json();
         Alert.alert('Error', data.detail || 'Something went wrong');

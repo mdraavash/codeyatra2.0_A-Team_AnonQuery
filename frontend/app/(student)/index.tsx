@@ -63,7 +63,7 @@ export default function StudentHome() {
       if (notifsRes.ok) setNotifications(await notifsRes.json());
       if (faqsRes.ok) setFaqs(await faqsRes.json());
     } catch {
-      // silent
+
     } finally {
       setLoading(false);
     }
@@ -154,7 +154,6 @@ export default function StudentHome() {
     </>
   );
 
-  /* ──────── FAQ Tab ──────── */
   const renderFAQ = () => (
     <>
       <View style={styles.introCard}>

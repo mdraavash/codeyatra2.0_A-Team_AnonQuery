@@ -42,8 +42,9 @@ export default function AskQuestion() {
       });
       if (res.ok) {
         Alert.alert('Success', 'Your query has been sent to the teacher!', [
-          { text: 'OK', onPress: () => router.back() },
+          { text: 'OK', onPress: () => router.replace('/(student)/' as never) },
         ]);
+        return;
       } else {
         const data = await res.json();
         Alert.alert('Error', data.detail || 'Something went wrong');
