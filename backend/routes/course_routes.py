@@ -16,7 +16,7 @@ def _course_doc(c) -> CourseResponse:
     )
 
 
-# ── List all subjects ────────────────────────────────
+# all subejcts
 @router.get("/", response_model=list[CourseResponse])
 async def list_subjects(current_user=Depends(get_current_user)):
     db = get_database()
@@ -24,7 +24,7 @@ async def list_subjects(current_user=Depends(get_current_user)):
     return [_course_doc(c) for c in courses]
 
 
-# ── Create a subject (teacher or admin) ──────────────
+# create subject
 @router.post("/", response_model=CourseResponse, status_code=201)
 async def create_subject(body: CourseCreate, current_user=Depends(get_current_user)):
     if current_user["role"] not in ("admin", "teacher"):
@@ -36,7 +36,7 @@ async def create_subject(body: CourseCreate, current_user=Depends(get_current_us
     return _course_doc(doc)
 
 
-# ── Subjects taught by teacher ───────────────────────
+# subject by teacher
 @router.get("/teaching", response_model=list[CourseResponse])
 async def teaching_subjects(current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":

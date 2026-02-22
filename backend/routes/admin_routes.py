@@ -12,7 +12,7 @@ def _require_admin(current_user):
         raise HTTPException(status_code=403, detail="Admin only")
 
 
-# ── List all teachers ─────────────────────────────────
+#teacher
 @router.get("/teachers", response_model=list[UserResponse])
 async def list_teachers(current_user=Depends(get_current_user)):
     _require_admin(current_user)
@@ -30,7 +30,7 @@ async def list_teachers(current_user=Depends(get_current_user)):
     ]
 
 
-# ── Create a teacher account ─────────────────────────
+# create teacher account
 @router.post("/teachers", response_model=UserResponse, status_code=201)
 async def create_teacher(body: UserRegister, current_user=Depends(get_current_user)):
     _require_admin(current_user)
@@ -53,13 +53,13 @@ async def create_teacher(body: UserRegister, current_user=Depends(get_current_us
     )
 
 
-# ── Create a subject and assign a teacher ─────────────
+# subject create and assign teacher
 @router.post("/subjects", response_model=CourseResponse, status_code=201)
 async def create_subject(body: CourseCreate, current_user=Depends(get_current_user)):
     _require_admin(current_user)
     db = get_database()
 
-    # Verify teacher exists
+    # teacher verify
     teacher = await db["users"].find_one({"_id": ObjectId(body.teacher_id), "role": "teacher"})
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
@@ -79,7 +79,7 @@ async def create_subject(body: CourseCreate, current_user=Depends(get_current_us
     )
 
 
-# ── List all subjects ─────────────────────────────────
+# subject list
 @router.get("/subjects", response_model=list[CourseResponse])
 async def list_subjects(current_user=Depends(get_current_user)):
     _require_admin(current_user)
@@ -96,7 +96,7 @@ async def list_subjects(current_user=Depends(get_current_user)):
     ]
 
 
-# ── Delete a subject ──────────────────────────────────
+# delete subject
 @router.delete("/subjects/{subject_id}")
 async def delete_subject(subject_id: str, current_user=Depends(get_current_user)):
     _require_admin(current_user)
@@ -107,7 +107,7 @@ async def delete_subject(subject_id: str, current_user=Depends(get_current_user)
     return {"message": "Subject deleted"}
 
 
-# ── Delete a teacher ──────────────────────────────────
+# delete teacher
 @router.delete("/teachers/{teacher_id}")
 async def delete_teacher(teacher_id: str, current_user=Depends(get_current_user)):
     _require_admin(current_user)

@@ -40,7 +40,7 @@ async def register(user: UserRegister):
 async def login(user: UserLogin):
     db = get_database()
 
-    # Find user by email
+    # find user
     db_user = await db["users"].find_one({"email": user.email})
     if not db_user:
         raise HTTPException(
@@ -48,7 +48,7 @@ async def login(user: UserLogin):
             detail="Invalid email or password",
         )
 
-    # Verify password (plain text comparison)
+    # password verification
     if user.password != db_user["password"]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

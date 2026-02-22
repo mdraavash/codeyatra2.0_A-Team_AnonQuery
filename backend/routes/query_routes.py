@@ -62,7 +62,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     result = await db["queries"].insert_one(doc)
     doc["_id"] = result.inserted_id
 
-    # Notify the teacher that a new question was asked
+    # notify teacher for new query
     await db["notifications"].insert_one({
         "user_id": course["teacher_id"],
         "message": f"{current_user.get('roll', '')} Raised a Question on {course['name']}",
@@ -75,7 +75,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     return _query_doc(doc)
 
 
-# ── Teacher: answer a query ──────────────────────────
+# teacher answer
 @router.patch("/{query_id}/answer", response_model=QueryResponse)
 async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":
@@ -93,7 +93,7 @@ async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(ge
         {"$set": {"answer": body.answer, "answered": True, "answered_at": now}},
     )
 
-    # Create notification for the student
+    # notification for student
     await db["notifications"].insert_one({
         "user_id": q["student_id"],
         "message": f"Your {q['course_name']} Query has been answered!!",
@@ -107,7 +107,7 @@ async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(ge
     return _query_doc(updated)
 
 
-# ── Student: my queries for a course ─────────────────
+# queries for a course
 @router.get("/course/{course_id}", response_model=list[QueryResponse])
 async def queries_for_course(course_id: str, current_user=Depends(get_current_user)):
     db = get_database()
@@ -118,7 +118,7 @@ async def queries_for_course(course_id: str, current_user=Depends(get_current_us
     return [_query_doc(q) for q in queries]
 
 
-# ── Student: my answered queries for a course ────────
+# answered queries for a course
 @router.get("/course/{course_id}/answered", response_model=list[QueryResponse])
 async def answered_queries_for_course(course_id: str, current_user=Depends(get_current_user)):
     db = get_database()
@@ -129,7 +129,7 @@ async def answered_queries_for_course(course_id: str, current_user=Depends(get_c
     return [_query_doc(q) for q in queries]
 
 
-# ── FAQ: answered queries visible to all enrolled ────
+# FAQ visibke to all students
 @router.get("/course/{course_id}/faq", response_model=list[QueryResponse])
 async def faq_for_course(course_id: str, current_user=Depends(get_current_user)):
     db = get_database()
@@ -139,7 +139,7 @@ async def faq_for_course(course_id: str, current_user=Depends(get_current_user))
     return [_query_doc(q) for q in queries]
 
 
-# ── FAQ: all answered queries across all subjects ────
+# FaQ of all subjects
 @router.get("/faq/all", response_model=list[QueryResponse])
 async def all_faq(current_user=Depends(get_current_user)):
     db = get_database()
@@ -149,7 +149,7 @@ async def all_faq(current_user=Depends(get_current_user)):
     return [_query_doc(q) for q in queries]
 
 
-# ── Teacher: queries assigned to me ──────────────────
+# queries assiged to teachers
 @router.get("/teacher", response_model=list[QueryResponse])
 async def teacher_queries(current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":
@@ -162,7 +162,7 @@ async def teacher_queries(current_user=Depends(get_current_user)):
     return [_query_doc(q) for q in queries]
 
 
-# ── Teacher: unanswered queries ──────────────────────
+# unanswered queries
 @router.get("/teacher/pending", response_model=list[QueryResponse])
 async def teacher_pending_queries(current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":
@@ -175,7 +175,7 @@ async def teacher_pending_queries(current_user=Depends(get_current_user)):
     return [_query_doc(q) for q in queries]
 
 
-# ── Notifications ─────────────────────────────────────
+# notifications
 @router.get("/notifications", response_model=list[NotificationResponse])
 async def get_notifications(current_user=Depends(get_current_user)):
     db = get_database()
@@ -186,7 +186,7 @@ async def get_notifications(current_user=Depends(get_current_user)):
     return [_notif_doc(n) for n in notifs]
 
 
-# ── Mark notification as read ─────────────────────────
+# mark as read
 @router.patch("/notifications/{notif_id}/read")
 async def mark_notification_read(notif_id: str, current_user=Depends(get_current_user)):
     db = get_database()
@@ -197,7 +197,7 @@ async def mark_notification_read(notif_id: str, current_user=Depends(get_current
     return {"message": "Marked as read"}
 
 
-# ── Teacher: students who asked in a course ───────────
+# students who asked query
 @router.get("/teacher/course/{course_id}/students")
 async def teacher_course_students(course_id: str, current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":
@@ -222,7 +222,7 @@ async def teacher_course_students(course_id: str, current_user=Depends(get_curre
     return list(students.values())
 
 
-# ── Teacher: queries from specific student in a course ─
+# all queries from specific student
 @router.get("/teacher/course/{course_id}/student/{student_id}", response_model=list[QueryResponse])
 async def teacher_student_queries(course_id: str, student_id: str, current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":
