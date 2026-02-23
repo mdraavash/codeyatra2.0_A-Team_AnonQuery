@@ -203,3 +203,129 @@ def find_best_match(query_vec, candidates, top_k=1):
 #         return json.loads(content)
 #     except:
 #         return []
+
+# ---- MongoDB Vector Search (Atlas Only) ----
+async def search_answered_questions_vector(db, query_embedding, course_id, limit=5):
+    """
+    Search answered questions using MongoDB vector search aggregation pipeline.
+    Requires $vectorSearch index on queries collection.
+    Uses cosine similarity for matching.
+    """
+    try:
+        pipeline = [
+            {
+                "$search": {
+                    "cosmosSearch": True,
+                    "vector": query_embedding,
+                    "k": limit
+                },
+                "path": "embedding",
+                "filter": {
+                    "course_id": course_id,
+                    "answered": True
+                }
+            },
+            {
+                "$project": {
+                    "similarityScore": {"$meta": "searchScore"},
+                    "_id": 1,
+                    "question": 1,
+                    "answer": 1,
+                    "course_id": 1
+                }
+            },
+            {
+                "$limit": limit
+            }
+        ]
+        
+        results = await db["queries"].aggregate(pipeline).to_list(limit)
+        return results
+    except Exception as e:
+        # Fallback to empty if vector search fails
+        return []
+
+
+async def search_faq_vector(db, query_embedding, course_id, limit=5):
+    """
+    Search FAQs using MongoDB vector search aggregation pipeline.
+    Requires $vectorSearch index on embedded_questions collection.
+    Prioritizes by frequency.
+    """
+    try:
+        pipeline = [
+            {
+                "$search": {
+                    "cosmosSearch": True,
+                    "vector": query_embedding,
+                    "k": limit
+                },
+                "path": "embedding",
+                "filter": {
+                    "course_id": course_id,
+                    "answer": {"$exists": True, "$ne": None}
+                }
+            },
+            {
+                "$project": {
+                    "similarityScore": {"$meta": "searchScore"},
+                    "_id": 1,
+                    "question": 1,
+                    "answer": 1,
+                    "frequency": 1
+                }
+            },
+            {
+                "$sort": {"frequency": -1}
+            },
+            {
+                "$limit": limit
+            }
+        ]
+        
+        results = await db["embedded_questions"].aggregate(pipeline).to_list(limit)
+        return results
+    except Exception as e:
+        # Fallback to empty if vector search fails
+        return []
+
+
+async def search_global_answered_questions(db, query_embedding, limit=5):
+    """
+    Global search across all answered questions (any course).
+    Uses MongoDB vector search aggregation pipeline.
+    Requires vector search index on queries collection.
+    """
+    try:
+        pipeline = [
+            {
+                "$search": {
+                    "cosmosSearch": True,
+                    "vector": query_embedding,
+                    "k": limit
+                },
+                "path": "embedding",
+                "filter": {
+                    "answered": True
+                }
+            },
+            {
+                "$project": {
+                    "similarityScore": {"$meta": "searchScore"},
+                    "_id": 1,
+                    "question": 1,
+                    "answer": 1,
+                    "course_id": 1,
+                    "course_name": 1
+                }
+            },
+            {
+                "$limit": limit
+            }
+        ]
+        
+        results = await db["queries"].aggregate(pipeline).to_list(limit)
+        return results
+    except Exception as e:
+        # Fallback to empty if vector search fails
+        return []

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from database import get_database
 from auth import get_current_user
 from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, EmbeddedQuestionResponse
-from aimodels import moderate_text, get_embedding, find_best_match, detect_subject_relevance
+from aimodels import moderate_text, get_embedding, find_best_match, detect_subject_relevance, search_answered_questions_vector, search_faq_vector
 from config import EMBEDDING_SIMILARITY_THRESHOLD, EMBEDDING_SEARCH_CANDIDATES, SUBJECT_VALIDATION_ENABLED, SUBJECT_VALIDATION_CONFIDENCE_THRESHOLD
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
@@ -100,25 +100,33 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
         query_emb = None
 
     if query_emb is not None:
-        # look for candidates in same course first
-        candidates = await db["embedded_questions"].find({"course_id": body.course_id}).sort("frequency", -1).to_list(EMBEDDING_SEARCH_CANDIDATES)
-        if not candidates:
-            # fallback to global candidates
-            candidates = await db["embedded_questions"].find({}).sort("frequency", -1).to_list(EMBEDDING_SEARCH_CANDIDATES)
-
-        best = find_best_match(query_emb, candidates, top_k=1)
-        if best:
-            matched_doc, score = best[0]
+        # PRIORITY 1: Search answered questions using MongoDB vector search (on course)
+        answered = await search_answered_questions_vector(db, query_emb, body.course_id, limit=5)
+        if answered:
+            best = answered[0]
+            score = best.get("similarityScore", 0)
             if score >= EMBEDDING_SIMILARITY_THRESHOLD:
-                # increment frequency and return matched FAQ info
-                await db["embedded_questions"].update_one({"_id": matched_doc["_id"]}, {"$inc": {"frequency": 1}})
-                faq = {
-                    "id": str(matched_doc["_id"]),
-                    "question": matched_doc.get("question"),
-                    "answer": matched_doc.get("answer"),
-                    "frequency": matched_doc.get("frequency", 1) + 1,
+                answer_response = {
+                    "id": str(best["_id"]),
+                    "question": best.get("question"),
+                    "answer": best.get("answer"),
                 }
-                return JSONResponse(status_code=200, content={"matched": True, "similarity": score, "faq": faq})
+                return JSONResponse(status_code=200, content={"matched": True, "similarity": score, "faq": answer_response})
+
+        # PRIORITY 2: Search FAQs using MongoDB vector search (on course)
+        faqs = await search_faq_vector(db, query_emb, body.course_id, limit=5)
+        if faqs:
+            best = faqs[0]
+            score = best.get("similarityScore", 0)
+            if score >= EMBEDDING_SIMILARITY_THRESHOLD:
+                await db["embedded_questions"].update_one({"_id": best["_id"]}, {"$inc": {"frequency": 1}})
+                faq_response = {
+                    "id": str(best["_id"]),
+                    "question": best.get("question"),
+                    "answer": best.get("answer"),
+                    "frequency": best.get("frequency", 0) + 1,
+                }
+                return JSONResponse(status_code=200, content={"matched": True, "similarity": score, "faq": faq_response})
 
     # No match found (or embedding failed) — proceed to create the query and store embedding
     doc = {
@@ -128,6 +136,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
         "student_name": current_user["name"],
         "student_roll": current_user.get("roll", ""),
         "question": body.question,
+        "embedding": query_emb,  # Store embedding for future similarity search
         "answer": None,
         "answered": False,
         "created_at": datetime.now(timezone.utc),
