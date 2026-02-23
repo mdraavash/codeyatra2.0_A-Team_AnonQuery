@@ -4,8 +4,9 @@ from bson import ObjectId
 from datetime import datetime, timezone
 from database import get_database
 from auth import get_current_user
-from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, RatingCreate, RatingResponse, TeacherRatingResponse
-from aimodels import moderate_text
+from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, EmbeddedQuestionResponse
+from aimodels import moderate_text, get_embedding, find_best_match
+from config import EMBEDDING_SIMILARITY_THRESHOLD, EMBEDDING_SEARCH_CANDIDATES
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
@@ -79,6 +80,34 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
             },
         )
 
+    # --- Embedding check for existing FAQ ---
+    try:
+        query_emb = get_embedding(body.question)
+    except Exception:
+        query_emb = None
+
+    if query_emb is not None:
+        # look for candidates in same course first
+        candidates = await db["embedded_questions"].find({"course_id": body.course_id}).sort("frequency", -1).to_list(EMBEDDING_SEARCH_CANDIDATES)
+        if not candidates:
+            # fallback to global candidates
+            candidates = await db["embedded_questions"].find({}).sort("frequency", -1).to_list(EMBEDDING_SEARCH_CANDIDATES)
+
+        best = find_best_match(query_emb, candidates, top_k=1)
+        if best:
+            matched_doc, score = best[0]
+            if score >= EMBEDDING_SIMILARITY_THRESHOLD:
+                # increment frequency and return matched FAQ info
+                await db["embedded_questions"].update_one({"_id": matched_doc["_id"]}, {"$inc": {"frequency": 1}})
+                faq = {
+                    "id": str(matched_doc["_id"]),
+                    "question": matched_doc.get("question"),
+                    "answer": matched_doc.get("answer"),
+                    "frequency": matched_doc.get("frequency", 1) + 1,
+                }
+                return JSONResponse(status_code=200, content={"matched": True, "similarity": score, "faq": faq})
+
+    # No match found (or embedding failed) — proceed to create the query and store embedding
     doc = {
         "course_id": body.course_id,
         "course_name": course["name"],
@@ -104,6 +133,22 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
         "read": False,
         "created_at": datetime.now(timezone.utc),
     })
+
+    # store embedding for this new question so it can be matched in future
+    if query_emb is not None:
+        try:
+            await db["embedded_questions"].insert_one({
+                "course_id": body.course_id,
+                "question": body.question,
+                "embedding": query_emb,
+                "frequency": 1,
+                "answer": None,
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+            })
+        except Exception:
+            # non-fatal: continue even if storing embedding fails
+            pass
 
     return _query_doc(doc)
 
@@ -143,6 +188,20 @@ async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(ge
     })
 
     updated = await db["queries"].find_one({"_id": ObjectId(query_id)})
+
+    # Update matching embedded question with the answer (if any)
+    try:
+        q_text = q.get("question")
+        if q_text:
+            emb = get_embedding(q_text)
+            candidates = await db["embedded_questions"].find({"course_id": q.get("course_id")} ).to_list(100)
+            best = find_best_match(emb, candidates, top_k=1)
+            if best:
+                matched_doc, score = best[0]
+                if score >= EMBEDDING_SIMILARITY_THRESHOLD:
+                    await db["embedded_questions"].update_one({"_id": matched_doc["_id"]}, {"$set": {"answer": body.answer, "updated_at": now}})
+    except Exception:
+        pass
     return _query_doc(updated, anonymous=True)
 
 
@@ -169,23 +228,41 @@ async def answered_queries_for_course(course_id: str, current_user=Depends(get_c
 
 
 # FAQ visibke to all students
-@router.get("/course/{course_id}/faq", response_model=list[QueryResponse])
+@router.get("/course/{course_id}/faq", response_model=list[EmbeddedQuestionResponse])
 async def faq_for_course(course_id: str, current_user=Depends(get_current_user)):
     db = get_database()
-    queries = await db["queries"].find(
-        {"course_id": course_id, "answered": True}
-    ).sort("answered_at", -1).to_list(50)
-    return [_query_doc(q) for q in queries]
+    faqs = await db["embedded_questions"].find(
+        {"course_id": course_id, "answer": {"$ne": None}}
+    ).sort("frequency", -1).to_list(50)
+    return [
+        EmbeddedQuestionResponse(
+            id=str(f["_id"]),
+            course_id=f.get("course_id"),
+            question=f.get("question"),
+            frequency=f.get("frequency", 0),
+            answer=f.get("answer"),
+            created_at=f.get("created_at").isoformat() if isinstance(f.get("created_at"), datetime) else f.get("created_at"),
+        ) for f in faqs
+    ]
 
 
 # FaQ of all subjects
-@router.get("/faq/all", response_model=list[QueryResponse])
+@router.get("/faq/all", response_model=list[EmbeddedQuestionResponse])
 async def all_faq(current_user=Depends(get_current_user)):
     db = get_database()
-    queries = await db["queries"].find(
-        {"answered": True}
-    ).sort("answered_at", -1).to_list(200)
-    return [_query_doc(q) for q in queries]
+    faqs = await db["embedded_questions"].find(
+        {"answer": {"$ne": None}}
+    ).sort("frequency", -1).to_list(200)
+    return [
+        EmbeddedQuestionResponse(
+            id=str(f["_id"]),
+            course_id=f.get("course_id"),
+            question=f.get("question"),
+            frequency=f.get("frequency", 0),
+            answer=f.get("answer"),
+            created_at=f.get("created_at").isoformat() if isinstance(f.get("created_at"), datetime) else f.get("created_at"),
+        ) for f in faqs
+    ]
 
 
 # all queries asked by the current student
