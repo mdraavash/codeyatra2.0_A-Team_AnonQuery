@@ -160,7 +160,7 @@ export default function StudentQueries() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2F2F2F' },
-  scrollContent: { paddingHorizontal: 17, paddingTop: 60, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 80, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
@@ -181,13 +181,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 5,
   },
   headerTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
@@ -197,25 +191,20 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
-    borderWidth: 1,
-    shadowColor: '#C4C4C4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 3,
   },
   statNum: { fontSize: 22, fontWeight: '800' },
   statLabel: { fontSize: 11, color: '#888', marginTop: 4, fontWeight: '600' },
 
-  sectionTitle: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', letterSpacing: 0.21, marginBottom: 14 },
+  sectionTitle: { fontSize: 14, fontWeight: '600', color: '#f2f2f2', letterSpacing: 0.21, marginBottom: 14 },
 
   /* Query Card */
   queryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -225,25 +214,25 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#2F2F2F', lineHeight: 22, marginBottom: 12 },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#f2f2f2', lineHeight: 22, marginBottom: 12 },
   queryFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   answeredBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   answeredText: { fontSize: 12, fontWeight: '600', color: '#2ecc71' },
   pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   pendingText: { fontSize: 12, fontWeight: '600', color: '#e67e22' },
   editHint: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  editHintText: { fontSize: 12, fontWeight: '600', color: '#0A3B87' },
+  editHintText: { fontSize: 12, fontWeight: '600', color: '#f2f2f2' },
   answerHint: {
     backgroundColor: 'rgba(10,59,135,0.12)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
   },
-  answerHintText: { fontSize: 12, fontWeight: '700', color: '#0A3B87' },
+  answerHintText: { fontSize: 12, fontWeight: '700', color: '#f2f2f2' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 18,
     padding: 40,
     alignItems: 'center',

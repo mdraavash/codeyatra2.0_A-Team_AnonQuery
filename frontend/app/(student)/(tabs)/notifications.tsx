@@ -46,7 +46,7 @@ export default function NotificationsScreen() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useFocusEffect(useCallback(() => { fetchNotifications(); }, [token]));
 
   const handlePress = (notif: Notification) => {
@@ -132,7 +132,7 @@ export default function NotificationsScreen() {
                     onPress={() => handlePress(notif)}
                   >
                     <View style={styles.notifIconWrap}>
-                      <Ionicons name="chatbubble-ellipses" size={20} color="#6C63FF" />
+                      <Ionicons name="chatbubble-ellipses" size={20} color="#F2f2f2" />
                     </View>
                     <View style={styles.notifContent}>
                       <Text style={styles.notifMessage} numberOfLines={2}>{notif.message}</Text>
@@ -159,7 +159,7 @@ export default function NotificationsScreen() {
                       <Ionicons name="chatbubble-outline" size={20} color="#666" />
                     </View>
                     <View style={styles.notifContent}>
-                      <Text style={[styles.notifMessage, { color: '#888' }]} numberOfLines={2}>{notif.message}</Text>
+                      <Text style={[styles.notifMessage, { color: '#f5f5f5' }]} numberOfLines={2}>{notif.message}</Text>
                       <Text style={styles.notifTime}>{formatTime(notif.created_at)}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#444" />
@@ -175,7 +175,7 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2f2f2f' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
 
   /* Page Header */
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   countBadge: {
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#444444',
     borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     paddingVertical: 50,
     alignItems: 'center',
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   notifCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 14,
     padding: 16,
     marginBottom: 10,

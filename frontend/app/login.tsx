@@ -82,16 +82,16 @@ export default function LoginPage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      
-      {/* Animated Logo */}
+{/*       
+      Animated Logo
       <Animated.Image
-        source={require('@/assets/images/logo.png')}
+        source={require('@/assets/images/Grouplogo.png')}
         style={[
           styles.logo,
           { transform: [{ translateY: logoTranslateY }] },
         ]}
         resizeMode="contain"
-      />
+      /> */}
 
       {/* Animated Form */}
       <Animated.View
@@ -103,6 +103,11 @@ export default function LoginPage() {
           },
         ]}
       >
+        <Image
+          source={require('@/assets/images/00 1.png')}
+          style={{ width: '100%', height: 150, marginBottom: 20 }}
+          resizeMode="contain"
+        />
         <Text style={styles.title}>Login</Text>
 
         <Text style={styles.name}>Email</Text>
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
   logo: {
     width: '100%',
     height: 100,
-    marginBottom: 40,
+    marginBottom: 0,
   },
   inner: {
     gap: 12,

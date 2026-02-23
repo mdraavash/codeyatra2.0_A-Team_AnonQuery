@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
 
   /* Sections */
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 18,
     padding: 20,
     marginBottom: 16,
@@ -247,14 +247,14 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0A3B87',
+    color: 'red',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   questionText: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#2F2F2F',
+    color: '#f5f5f5',
     lineHeight: 26,
   },
   answerText: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
 
   /* Rating Section */
   ratingSection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 18,
     padding: 24,
     alignItems: 'center',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   ratingTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#2F2F2F',
+    color: '#f5f5f5',
     marginBottom: 6,
   },
   ratingSubtitle: {

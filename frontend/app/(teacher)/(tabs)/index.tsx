@@ -63,7 +63,6 @@ export default function TeacherHome() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { fetchData(); }, [token]));
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
@@ -118,7 +117,7 @@ export default function TeacherHome() {
             }}
           >
             <View style={styles.alertIconWrap}>
-              <Ionicons name="notifications" size={18} color="#FFD700" />
+              <Ionicons name="notifications" size={18} color="#54e0a8" />
             </View>
             <Text style={styles.alertText}>
               You have {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
@@ -200,9 +199,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
     borderColor: '#F5F5F5',
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -212,7 +209,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#0A3B87',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
@@ -225,15 +222,13 @@ const styles = StyleSheet.create({
   alertBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
+    color: '#f2f2f2',
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginTop: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#FFD700',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 3,
@@ -247,13 +242,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  alertText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#2F2F2F' },
+  alertText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#f2f2f2' },
 
   /* Section */
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#F2f2f2',
     letterSpacing: 0.21,
     marginTop: 24,
     marginBottom: 14,
@@ -263,18 +258,16 @@ const styles = StyleSheet.create({
   notifCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 3,
   },
-  notifUnread: { borderLeftWidth: 4, borderLeftColor: '#FFD700' },
+  notifUnread: { borderLeftWidth: 4, borderLeftColor: '#54e0a8 ' },
   notifDot: {
     width: 8,
     height: 8,
@@ -282,8 +275,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#B7B7B7',
     marginRight: 12,
   },
-  notifDotActive: { backgroundColor: '#FFD700' },
-  notifText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#2F2F2F', letterSpacing: 0.21 },
+  notifDotActive: { backgroundColor: '#54e0a8' },
+  notifText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#f2f2f2', letterSpacing: 0.21 },
 
   /* Subjects Grid */
   subjectsGrid: {
@@ -293,7 +286,7 @@ const styles = StyleSheet.create({
   },
   subjectCard: {
     width: CARD_W,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 25,
     padding: 16,
     alignItems: 'center',
@@ -312,11 +305,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  subjectName: { fontSize: 14, fontWeight: '600', color: '#2F2F2F', textAlign: 'center' },
+  subjectName: { fontSize: 14, fontWeight: '600', color: '#f2f2f2', textAlign: 'center' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 40,
     alignItems: 'center',

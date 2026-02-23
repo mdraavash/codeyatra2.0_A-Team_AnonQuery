@@ -177,15 +177,10 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
-    borderWidth: 1,
-    shadowColor: '#C4C4C4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 3,
   },
   statNum: { fontSize: 24, fontWeight: '800' },
@@ -197,15 +192,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
   },
-  chipActive: { backgroundColor: '#0A3B87' },
+  chipActive: { backgroundColor: '#b38926' },
   chipText: { fontSize: 13, fontWeight: '600', color: '#888' },
   chipTextActive: { color: '#FFF' },
 
   /* Query Card */
   queryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -224,7 +219,7 @@ const styles = StyleSheet.create({
   },
   queryCourseBadgeText: { fontSize: 11, fontWeight: '700', color: '#FFF' },
   queryTime: { fontSize: 11, color: '#B7B7B7' },
-  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#2F2F2F', lineHeight: 22, marginBottom: 12 },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#f2f2f2', lineHeight: 22, marginBottom: 12 },
   queryFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   queryStudent: { fontSize: 12, color: '#888' },
   answeredBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -234,12 +229,12 @@ const styles = StyleSheet.create({
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 18,
     padding: 48,
     alignItems: 'center',
     marginTop: 20,
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#2F2F2F', marginTop: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#f2f2f2', marginTop: 16 },
   emptyText: { fontSize: 13, color: '#888', marginTop: 6 },
 });

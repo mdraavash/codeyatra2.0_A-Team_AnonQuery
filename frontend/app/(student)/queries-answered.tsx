@@ -141,17 +141,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 10,
     padding: 16,
     marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: '#2ecc71',
+    borderLeftWidth: 4
   },
   statsText: { fontSize: 15, fontWeight: '600', color: '#2ecc71' },
 
   emptyCard: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 20,
     paddingVertical: 50,
     alignItems: 'center',
@@ -161,12 +160,11 @@ const styles = StyleSheet.create({
   emptySubText: { fontSize: 13, color: '#888' },
 
   queryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 18,
     marginBottom: 14,
     borderLeftWidth: 3,
-    borderLeftColor: '#2ecc71',
     shadowColor: '#C4C4C4',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,

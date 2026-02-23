@@ -122,7 +122,7 @@ export default function CourseStudents() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2F2F2F' },
-  scrollContent: { paddingHorizontal: 17, paddingTop: 60, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 80, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
@@ -144,12 +144,6 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 5,
   },
   headerTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
@@ -169,13 +163,13 @@ const styles = StyleSheet.create({
   studentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 10,
+    color: '#f2f2f2',
     paddingHorizontal: 16,
     paddingVertical: 16,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+  
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 3,
@@ -184,8 +178,8 @@ const styles = StyleSheet.create({
   dotPending: { backgroundColor: '#e67e22' },
   dotClear: { backgroundColor: '#2ecc71' },
   studentInfo: { flex: 1 },
-  studentRoll: { fontSize: 15, fontWeight: '700', color: '#2F2F2F' },
-  studentName: { fontSize: 12, color: '#888', marginTop: 2 },
+  studentRoll: { fontSize: 15, fontWeight: '700', color: '#f2f2f2' },
+  studentName: { fontSize: 12, color: '#f2f2f2', marginTop: 2 },
   pendingTag: {
     backgroundColor: 'rgba(230,126,34,0.12)',
     paddingHorizontal: 10,
@@ -197,12 +191,12 @@ const styles = StyleSheet.create({
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 18,
     padding: 48,
     alignItems: 'center',
     marginTop: 20,
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#2F2F2F', marginTop: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#f2f2f2', marginTop: 16 },
   emptyText: { fontSize: 13, color: '#888', marginTop: 6 },
 });

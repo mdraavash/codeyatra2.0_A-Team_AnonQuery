@@ -77,7 +77,7 @@ export default function FAQScreen() {
           <View style={styles.pageHeaderText}>
             <Text style={styles.pageTitle}>All queries</Text>
             <Text style={styles.pageSubtitle}>Asked Questions across all courses</Text>
-          </View>
+          </View>1
         </View>
 
         {faqs.length === 0 ? (
@@ -126,7 +126,8 @@ export default function FAQScreen() {
                             answer: faq.answer ?? '',
                             courseName: faq.course_name,
                             teacherId: faq.teacher_id ?? '',
-                          },
+    
+                        },
                         })
                       }
                     >
