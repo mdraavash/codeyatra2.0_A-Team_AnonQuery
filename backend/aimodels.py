@@ -1,244 +1,120 @@
 import os
 import json
 import re
-import time
+import csv
 import numpy as np
+import os
+import asyncio
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from ai_clients import hf_client, llm
 
 load_dotenv()
 
-# Initialize LLM
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
-    temperature=0.1,
-    max_retries=3
-)
-
-# Embedding model
-embeddings_model = GoogleGenerativeAIEmbeddings(
-    model="textembedding-gecko-001",
-    google_api_key=os.getenv("GOOGLE_API_KEY")
-)
-
-# Spam and moderation functions
-CUSTOM_BAD_WORDS = ["muji","randi","machikne","fuck","bitch","idiot","stupid"]
+#Moderation & Spam
+CUSTOM_BAD_WORDS = []
+with open("bad_words.csv", "r", encoding="utf-8") as file:
+    reader = csv.DictReader(file)  # because we used header "word"
+    for row in reader:
+        CUSTOM_BAD_WORDS.append(row["word"].strip().lower())
 
 def contains_custom_profanity(text):
     text_lower = text.lower()
-    for word in CUSTOM_BAD_WORDS:
-        if word in text_lower:
-            return True
-    return False
+    return any(word in text_lower for word in CUSTOM_BAD_WORDS)
 
 def rule_based_spam_score(text):
     score = 0.0
     if len(re.findall(r"http[s]?://", text)) > 1: score += 0.4
-    if re.search(r"(.)\1{4,}", text): score += 0.3
-    if text.isupper(): score += 0.2
-    words = text.lower().split()
-    if len(words) != len(set(words)): score += 0.1
+    if re.search(r"(.)\1{4,}", text): score += 0.3 
+    if text.isupper() and len(text) > 5: score += 0.2
     return min(score, 1.0)
 
-def llm_moderation(text):
-    prompt = f"""
-You are a strict academic content moderation AI.
-Classify the message into ONE of these categories:
-SAFE, HATE_SPEECH, HARASSMENT, SPAM, SEXUAL, VIOLENCE
-Message: "{text}"
-Return ONLY valid JSON like:
-{{"label": "SAFE", "confidence": 0.95}}
-"""
-    try:
-        response = llm.invoke(prompt)
-        content = response.content.strip()
-        if content.startswith("```"):
-            content = content.replace("```json","").replace("```","").strip()
-        parsed = json.loads(content)
-        return {"label": parsed.get("label","ERROR"), "confidence": float(parsed.get("confidence",0))}
-    except Exception as e:
-        return {"label":"ERROR","confidence":0}
-
-def moderate_text(text):
+async def moderate_text(text):
     spam_score = rule_based_spam_score(text)
     if spam_score > 0.6:
-        return {"label":"SPAM","confidence":spam_score,"blocked":True,"source":"rule_based"}
+        return {"label":"SPAM", "confidence":spam_score, "blocked":True, "source":"rule_based"}
+    
     if contains_custom_profanity(text):
-        return {"label":"HARASSMENT","confidence":0.95,"blocked":True,"source":"custom_list"}
-    llm_result = llm_moderation(text)
-    blocked = llm_result["label"] != "SAFE" and llm_result["confidence"] > 0.6
-    return {"label":llm_result["label"],"confidence":llm_result["confidence"],"blocked":blocked,"source":"llm"}
+        return {"label":"HARASSMENT", "confidence":0.95, "blocked":True, "source":"custom_list"}
 
-# Emotion detection
-def detect_emotion(text):
     prompt = f"""
-You are an AI emotion detection system for classroom analytics.
-Classify the emotional tone into ONE of: CONFUSED, FRUSTRATED, CURIOUS, ANXIOUS, NEUTRAL
-Message: "{text}"
-Return ONLY valid JSON: {{"emotion":"CONFUSED","confidence":0.85}}
-"""
-    try:
-        response = llm.invoke(prompt)
-        content = response.content.strip()
-        if content.startswith("```"):
-            content = content.replace("```json","").replace("```","").strip()
-        parsed = json.loads(content)
-        return {"emotion": parsed.get("emotion","NEUTRAL"), "confidence": float(parsed.get("confidence",0))}
-    except:
-        return {"emotion":"NEUTRAL","confidence":0}
-
-# Subject Detection
-def detect_subject_relevance(question: str, course_name: str):
+    Classify into: SAFE, HATE_SPEECH, HARASSMENT, SPAM, SEXUAL, VIOLENCE.
+    Message: "{text}"
+    Return ONLY valid JSON: {{"label": "SAFE", "confidence": 0.95}}
     """
-    Determine if a question is relevant to the course subject.
-    Returns: {"is_relevant": bool, "confidence": float, "reason": str}
-    """
-    prompt = f"""
-You are an AI that validates if student questions are relevant to their course subject.
-
-Course Subject: "{course_name}"
-Student Question: "{question}"
-
-Determine if the question is asking about topics related to {course_name}.
-Consider the question relevant if it:
-- Directly asks about concepts in {course_name}
-- Asks for clarification on course material
-- Seeks help with assignments or problems related to {course_name}
-- Discusses course topics
-
-Return ONLY valid JSON like:
-{{"is_relevant": true, "confidence": 0.92, "reason": "Question directly asks about..."}}
-"""
     try:
-        response = llm.invoke(prompt)
-        content = response.content.strip()
-        if content.startswith("```"):
-            content = content.replace("```json","").replace("```","").strip()
-        parsed = json.loads(content)
-        return {
-            "is_relevant": bool(parsed.get("is_relevant", False)),
-            "confidence": float(parsed.get("confidence", 0)),
-            "reason": parsed.get("reason", "")
-        }
-    except Exception as e:
-        # If there's an error, be lenient and allow the question
-        return {"is_relevant": True, "confidence": 0.0, "reason": "Could not validate"}
+        response = await llm.ainvoke(prompt)
+        parsed = json.loads(response.content)
+        blocked = parsed.get("label") != "SAFE" and parsed.get("confidence", 0) > 0.6
+        return {**parsed, "blocked": blocked, "source": "llm"}
+    except Exception:
+        return {"label":"ERROR", "confidence":0, "blocked": False}
 
+#Embedding & Vector Search
 
-# Embedding utilities
-def get_embedding(text):
-    return embeddings_model.embed(text)
-
-def cosine_similarity(a, b):
-    a = np.array(a, dtype=float)
-    b = np.array(b, dtype=float)
-    if a.size == 0 or b.size == 0:
-        return 0.0
-    denom = (np.linalg.norm(a) * np.linalg.norm(b))
-    if denom == 0:
-        return 0.0
-    return float(np.dot(a, b) / denom)
-
-
-def find_best_match(query_vec, candidates, top_k=1):
-    scored = []
-    for c in candidates:
-        emb = c.get("embedding")
-        if not emb:
-            continue
-        try:
-            score = cosine_similarity(query_vec, emb)
-        except Exception:
-            score = 0.0
-        scored.append((c, score))
-    scored.sort(key=lambda x: x[1], reverse=True)
-    return scored[:top_k]
-
-# # ---- Vector Search ----
-# @app.get("/search")
-# def search(query: str):
-#     query_embedding = get_embedding(query)
-
-#     results = collection.aggregate([
-#         {
-#             "$vectorSearch": {
-#                 "index": "default",
-#                 "path": "embedding",
-#                 "queryVector": query_embedding,
-#                 "numCandidates": 100,
-#                 "limit": 5
-#             }
-#         },
-#         {
-#             "$project": {
-#                 "_id": 0,
-#                 "title": 1,
-#                 "content": 1,
-#                 "score": {"$meta": "vectorSearchScore"}
-#             }
-#         }
-#     ])
-
-#     return {"results": list(results)}
-
-# Question clustering (optional)
-# def cluster_questions(question_list):
-#     if not question_list: return []
-#     prompt = f"""
-# You are an AI classroom assistant.
-# Group the following student questions into logical topic clusters.
-# Return ONLY valid JSON like:
-# [{{"topic":"Topic Name","questions":["q1","q2"]}}]
-# Questions: {question_list}
-# """
-#     try:
-#         response = llm.invoke(prompt)
-#         content = response.content.strip()
-#         if content.startswith("```"):
-#             content = content.replace("```json","").replace("```","").strip()
-#         return json.loads(content)
-#     except:
-#         return []
-
-# ---- MongoDB Vector Search (Atlas Only) ----
-async def search_answered_questions_vector(db, query_embedding, course_id, limit=5):
+async def get_embedding(text):
     try:
-        pipeline = [
-            {
-                "$search": {
-                    "cosmosSearch": True,
-                    "vector": query_embedding,
-                    "k": limit
-                },
+        vector = await asyncio.to_thread(
+            hf_client.encode, text, convert_to_numpy=True
+        )
+        return vector.tolist() if hasattr(vector, "tolist") else vector
+    except Exception as hf_e:
+        print(f"Local Embedding ERROR: {hf_e}")
+        return None
+    
+async def search_atlas_vector(db, collection_name, query_embedding, filter_dict=None, limit=5):
+    pipeline = [
+        {
+            "$vectorSearch": {
+                "index": "questions_vector_index",
                 "path": "embedding",
-                "filter": {
-                    "course_id": course_id,
-                    "answered": True
-                }
-            },
-            {
-                "$project": {
-                    "similarityScore": {"$meta": "searchScore"},
-                    "_id": 1,
-                    "question": 1,
-                    "answer": 1,
-                    "course_id": 1
-                }
-            },
-            {
-                "$limit": limit
+                "queryVector": query_embedding,
+                "numCandidates": 100,
+                "limit": limit,
+                **({"filter": filter_dict} if filter_dict else {})
             }
-        ]
-        
-        results = await db["queries"].aggregate(pipeline).to_list(limit)
-        return results
-    except Exception as e:
-        # Fallback to empty if vector search fails
-        return []
+        },
+        {
+            "$project": {
+                "similarityScore": {"$meta": "vectorSearchScore"},
+                "_id": 1,
+                "question": 1,
+                "answer": 1,
+                "course_id": 1,
+                "frequency": 1
+            }
+        }
+    ]
 
+    cursor = db[collection_name].aggregate(pipeline)
+    return await cursor.to_list(length=limit)    
+
+#Logic Required by Query Routes
+
+async def detect_subject_relevance(question: str, course_name: str):
+    """Checks if the question pertains to the specific course subject."""
+    prompt = f"""
+    Determine if the question is relevant to the course: "{course_name}".
+    Question: "{question}"
+    Return ONLY valid JSON: {{"is_relevant": true, "reason": "explanation"}}
+    """
+    try:
+        response = await llm.ainvoke(prompt)
+        return json.loads(response.content)
+    except Exception:
+        return {"is_relevant": True, "reason": "Error during validation"}
+
+def find_best_match(query_embedding, candidates):
+    """Helper to pick the highest scoring candidate from a list."""
+    if not candidates:
+        return None
+    return max(candidates, key=lambda x: x.get("similarityScore", 0))
+
+async def search_answered_questions_vector(db, query_embedding, course_id, limit=5):
+    filters = {"course_id": {"$eq": course_id}, "answered": {"$eq": True}}
+    return await search_atlas_vector(db, "queries", query_embedding, filters, limit)
 
 async def search_faq_vector(db, query_embedding, course_id, limit=5):
+<<<<<<< HEAD
     try:
         pipeline = [
             {
@@ -311,3 +187,8 @@ async def search_global_answered_questions(db, query_embedding, limit=5):
     except Exception as e:
         # Fallback to empty if vector search fails
         return []
+=======
+    filters = {"course_id": {"$eq": course_id}, "answer": {"$exists": True}}
+    results = await search_atlas_vector(db, "embedded_questions", query_embedding, filters, limit)
+    return sorted(results, key=lambda x: x.get("frequency", 0), reverse=True)
+>>>>>>> 48905cc0823b10c79485d701f2228043f836e648
