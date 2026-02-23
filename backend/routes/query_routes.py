@@ -53,9 +53,9 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # --- Moderation ---
-    moderation = moderate_text(body.question)
-    if moderation["blocked"] and moderation["confidence"] > 0.8:
+    # --- Moderation (Awaited) ---
+    moderation = await moderate_text(body.question)
+    if moderation.get("blocked") and moderation.get("confidence", 0) > 0.8:
         return JSONResponse(
             status_code=400,
             content={
@@ -65,10 +65,10 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
             },
         )
 
-    # --- Subject Validation ---
+    # --- Subject Validation (Awaited) ---
     if SUBJECT_VALIDATION_ENABLED:
-        subject_check = detect_subject_relevance(body.question, course["name"])
-        if not subject_check["is_relevant"]:
+        subject_check = await detect_subject_relevance(body.question, course["name"])
+        if not subject_check.get("is_relevant"):
             return JSONResponse(
                 status_code=400,
                 content={
@@ -78,15 +78,15 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
                 },
             )
 
-    # --- Generate embedding ---
+    # --- Generate embedding (Awaited) ---
     try:
-        query_emb = get_embedding(body.question)
+        query_emb = await get_embedding(body.question)
     except Exception:
         query_emb = None
 
     embedded_question_id = None
 
-    # --- Step 1: Check Answered Queries (Priority 1) ---
+    # --- Step 1: Check Answered Queries (Awaited) ---
     if query_emb is not None:
         answered = await search_answered_questions_vector(
             db, query_emb, body.course_id, limit=1
@@ -109,7 +109,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
                     },
                 )
 
-    # --- Step 2: Check Existing FAQ ---
+    # --- Step 2: Check Existing FAQ (Awaited) ---
     if query_emb is not None:
         faqs = await search_faq_vector(db, query_emb, body.course_id, limit=1)
 
@@ -137,7 +137,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
                     },
                 )
 
-    # --- Step 3: Create New Embedded Question (if not matched) ---
+    # --- Step 3: Create New Embedded Question ---
     if query_emb is not None:
         embedded_doc = await db["embedded_questions"].insert_one({
             "course_id": body.course_id,
@@ -148,7 +148,6 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
             "created_at": datetime.now(timezone.utc),
             "updated_at": datetime.now(timezone.utc),
         })
-
         embedded_question_id = embedded_doc.inserted_id
 
     # --- Step 4: Create Query ---
@@ -182,7 +181,6 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     })
 
     return _query_doc(doc)
-
 # teacher answer
 @router.patch("/{query_id}/answer", response_model=QueryResponse)
 async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(get_current_user)):
