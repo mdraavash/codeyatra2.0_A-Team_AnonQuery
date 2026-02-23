@@ -4,8 +4,9 @@ from bson import ObjectId
 from datetime import datetime, timezone
 from database import get_database
 from auth import get_current_user
-from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, RatingCreate, RatingResponse, TeacherRatingResponse
-from aimodels import moderate_text
+from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, EmbeddedQuestionResponse
+from aimodels import moderate_text, get_embedding, find_best_match, detect_subject_relevance, search_answered_questions_vector, search_faq_vector
+from config import EMBEDDING_SIMILARITY_THRESHOLD, EMBEDDING_SEARCH_CANDIDATES, SUBJECT_VALIDATION_ENABLED, SUBJECT_VALIDATION_CONFIDENCE_THRESHOLD
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
@@ -44,41 +45,112 @@ def _notif_doc(n) -> NotificationResponse:
 async def create_query(body: QueryCreate, current_user=Depends(get_current_user)):
     if current_user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can ask queries")
-    
+
     db = get_database()
     student_id = str(current_user["_id"])
-
-    '''today_start = datetime.now(timezone.utc).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
-    
-    query_count = await db["queries"].count_documents({
-        "student_id": student_id,
-        "created_at": {"$gte": today_start}
-    })
-
-    if query_count >= 5:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS, 
-            detail="You have reached your limit of 5 queries for today. Please try again tomorrow."
-        )'''
 
     course = await db["courses"].find_one({"_id": ObjectId(body.course_id)})
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # AI moderation check
-    moderation = moderate_text(body.question)
-    if moderation["blocked"] and moderation["confidence"] > 0.8:
+    # --- Moderation (Awaited) ---
+    moderation = await moderate_text(body.question)
+    if moderation.get("blocked") and moderation.get("confidence", 0) > 0.8:
         return JSONResponse(
             status_code=400,
             content={
-                "detail": f"Your query was flagged as {moderation['label'].lower()} content. Please rephrase your question appropriately.",
+                "detail": f"Your query was flagged as {moderation['label'].lower()} content. Please rephrase your question.",
                 "moderation": True,
                 "label": moderation["label"],
             },
         )
 
+    # --- Subject Validation (Awaited) ---
+    if SUBJECT_VALIDATION_ENABLED:
+        subject_check = await detect_subject_relevance(body.question, course["name"])
+        if not subject_check.get("is_relevant"):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": f"Your question doesn't seem to be about {course['name']}. Please ask subject-related questions.",
+                    "subject_invalid": True,
+                    "reason": subject_check.get("reason", ""),
+                },
+            )
+
+    # --- Generate embedding (Awaited) ---
+    try:
+        query_emb = await get_embedding(body.question)
+    except Exception:
+        query_emb = None
+
+    embedded_question_id = None
+
+    # --- Step 1: Check Answered Queries (Awaited) ---
+    if query_emb is not None:
+        answered = await search_answered_questions_vector(
+            db, query_emb, body.course_id, limit=1
+        )
+        if answered:
+            best = answered[0]
+            score = best.get("similarityScore", 0)
+
+            if score >= EMBEDDING_SIMILARITY_THRESHOLD:
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "matched": True,
+                        "similarity": score,
+                        "faq": {
+                            "id": str(best["_id"]),
+                            "question": best["question"],
+                            "answer": best["answer"],
+                        },
+                    },
+                )
+
+    # --- Step 2: Check Existing FAQ (Awaited) ---
+    if query_emb is not None:
+        faqs = await search_faq_vector(db, query_emb, body.course_id, limit=1)
+
+        if faqs:
+            best = faqs[0]
+            score = best.get("similarityScore", 0)
+
+            if score >= EMBEDDING_SIMILARITY_THRESHOLD:
+                await db["embedded_questions"].update_one(
+                    {"_id": best["_id"]},
+                    {"$inc": {"frequency": 1}}
+                )
+
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "matched": True,
+                        "similarity": score,
+                        "faq": {
+                            "id": str(best["_id"]),
+                            "question": best["question"],
+                            "answer": best["answer"],
+                            "frequency": best.get("frequency", 0) + 1,
+                        },
+                    },
+                )
+
+    # --- Step 3: Create New Embedded Question ---
+    if query_emb is not None:
+        embedded_doc = await db["embedded_questions"].insert_one({
+            "course_id": body.course_id,
+            "question": body.question,
+            "embedding": query_emb,
+            "frequency": 1,
+            "answer": None,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+        })
+        embedded_question_id = embedded_doc.inserted_id
+
+    # --- Step 4: Create Query ---
     doc = {
         "course_id": body.course_id,
         "course_name": course["name"],
@@ -86,16 +158,19 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
         "student_name": current_user["name"],
         "student_roll": current_user.get("roll", ""),
         "question": body.question,
+        "embedding": query_emb,
+        "embedded_question_id": embedded_question_id,
         "answer": None,
         "answered": False,
         "created_at": datetime.now(timezone.utc),
         "answered_at": None,
         "teacher_id": course["teacher_id"],
     }
-    
+
     result = await db["queries"].insert_one(doc)
     doc["_id"] = result.inserted_id
 
+    # --- Notify Teacher ---
     await db["notifications"].insert_one({
         "user_id": course["teacher_id"],
         "message": f"A student raised a question on {course['name']}",
@@ -106,45 +181,62 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     })
 
     return _query_doc(doc)
-
-
 # teacher answer
 @router.patch("/{query_id}/answer", response_model=QueryResponse)
 async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(get_current_user)):
     if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can answer queries")
+
     db = get_database()
+
     q = await db["queries"].find_one({"_id": ObjectId(query_id)})
     if not q:
         raise HTTPException(status_code=404, detail="Query not found")
+
     if q["teacher_id"] != str(current_user["_id"]):
         raise HTTPException(status_code=403, detail="This query is not assigned to you")
 
     now = datetime.now(timezone.utc)
+
+    # --- Update Query ---
     await db["queries"].update_one(
         {"_id": ObjectId(query_id)},
-        {"$set": {"answer": body.answer, "answered": True, "answered_at": now}},
+        {"$set": {
+            "answer": body.answer,
+            "answered": True,
+            "answered_at": now
+        }},
     )
 
-    # notification for student
+    # --- Notify Student ---
     await db["notifications"].insert_one({
         "user_id": q["student_id"],
-        "message": f"Your {q['course_name']} Query has been answered!!",
+        "message": f"Your {q['course_name']} Query has been answered!",
         "query_id": query_id,
         "course_id": q["course_id"],
         "read": False,
         "created_at": now,
     })
 
-    # remove the teacher's notification for this query
+    # --- Remove Teacher Notification ---
     await db["notifications"].delete_many({
         "user_id": str(current_user["_id"]),
         "query_id": query_id,
     })
 
+    # --- Guaranteed FAQ Update ---
+    embedded_id = q.get("embedded_question_id")
+    if embedded_id:
+        await db["embedded_questions"].update_one(
+            {"_id": embedded_id},
+            {"$set": {
+                "answer": body.answer,
+                "updated_at": now
+            }}
+        )
+
     updated = await db["queries"].find_one({"_id": ObjectId(query_id)})
     return _query_doc(updated, anonymous=True)
-
 
 # queries for a course
 @router.get("/course/{course_id}", response_model=list[QueryResponse])
@@ -169,23 +261,41 @@ async def answered_queries_for_course(course_id: str, current_user=Depends(get_c
 
 
 # FAQ visibke to all students
-@router.get("/course/{course_id}/faq", response_model=list[QueryResponse])
+@router.get("/course/{course_id}/faq", response_model=list[EmbeddedQuestionResponse])
 async def faq_for_course(course_id: str, current_user=Depends(get_current_user)):
     db = get_database()
-    queries = await db["queries"].find(
-        {"course_id": course_id, "answered": True}
-    ).sort("answered_at", -1).to_list(50)
-    return [_query_doc(q) for q in queries]
+    faqs = await db["embedded_questions"].find(
+        {"course_id": course_id, "answer": {"$ne": None}}
+    ).sort("frequency", -1).to_list(50)
+    return [
+        EmbeddedQuestionResponse(
+            id=str(f["_id"]),
+            course_id=f.get("course_id"),
+            question=f.get("question"),
+            frequency=f.get("frequency", 0),
+            answer=f.get("answer"),
+            created_at=f.get("created_at").isoformat() if isinstance(f.get("created_at"), datetime) else f.get("created_at"),
+        ) for f in faqs
+    ]
 
 
 # FaQ of all subjects
-@router.get("/faq/all", response_model=list[QueryResponse])
+@router.get("/faq/all", response_model=list[EmbeddedQuestionResponse])
 async def all_faq(current_user=Depends(get_current_user)):
     db = get_database()
-    queries = await db["queries"].find(
-        {"answered": True}
-    ).sort("answered_at", -1).to_list(200)
-    return [_query_doc(q) for q in queries]
+    faqs = await db["embedded_questions"].find(
+        {"answer": {"$ne": None}}
+    ).sort("frequency", -1).to_list(200)
+    return [
+        EmbeddedQuestionResponse(
+            id=str(f["_id"]),
+            course_id=f.get("course_id"),
+            question=f.get("question"),
+            frequency=f.get("frequency", 0),
+            answer=f.get("answer"),
+            created_at=f.get("created_at").isoformat() if isinstance(f.get("created_at"), datetime) else f.get("created_at"),
+        ) for f in faqs
+    ]
 
 
 # all queries asked by the current student

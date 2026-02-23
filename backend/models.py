@@ -74,10 +74,11 @@ class NotificationResponse(BaseModel):
     created_at: str
 
 
+# ── Rating ──
 class RatingCreate(BaseModel):
     query_id: str
     teacher_id: str
-    rating: int         
+    rating: int          # 1-5
 
 class RatingResponse(BaseModel):
     id: str
@@ -91,3 +92,22 @@ class TeacherRatingResponse(BaseModel):
     teacher_id: str
     average_rating: float
     total_ratings: int
+
+
+# ---- Embedded questions (FAQ) ----
+class EmbeddedQuestionCreate(BaseModel):
+    course_id: Optional[str]
+    question: str
+    embedding: List[float]
+    frequency: int = 1
+    answer: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class EmbeddedQuestionResponse(BaseModel):
+    id: str
+    course_id: Optional[str]
+    question: str
+    frequency: int
+    answer: Optional[str] = None
+    created_at: Optional[str] = None
