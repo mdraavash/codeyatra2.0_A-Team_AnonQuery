@@ -6,30 +6,11 @@ import numpy as np
 import os
 import asyncio
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from huggingface_hub import InferenceClient
-
-hf_client = InferenceClient(
-    provider="hf-inference",
-    api_key=os.getenv("HF_TOKEN")
-)
+from ai_clients import hf_client, llm
 
 load_dotenv()
 
-# --- 1. Initialization ---
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
-    temperature=0.1,
-    response_mime_type="application/json"
-)
-
-embeddings_model = GoogleGenerativeAIEmbeddings(
-    model="models/text-embedding-001", 
-    google_api_key=os.getenv("GOOGLE_API_KEY")
-)
-
-# --- 2. Moderation & Spam ---
+#Moderation & Spam
 CUSTOM_BAD_WORDS = []
 with open("bad_words.csv", "r", encoding="utf-8") as file:
     reader = csv.DictReader(file)  # because we used header "word"
@@ -68,24 +49,16 @@ async def moderate_text(text):
     except Exception:
         return {"label":"ERROR", "confidence":0, "blocked": False}
 
-# --- 3. Embedding & Vector Search ---
+#Embedding & Vector Search
 
 async def get_embedding(text):
-    # Try Google
-    try:
-        return await embeddings_model.aembed_query(text)
-    except Exception as e:
-        print(f"GOOGLE EMBEDDING ERROR: {e}. Trying Hugging Face API...")
-    # Try Hugging Face 
     try:
         vector = await asyncio.to_thread(
-            hf_client.feature_extraction,
-            text,
-            model="sentence-transformers/all-MiniLM-L6-v2"
+            hf_client.encode, text, convert_to_numpy=True
         )
         return vector.tolist() if hasattr(vector, "tolist") else vector
     except Exception as hf_e:
-        print(f"HF API ERROR: {hf_e}")
+        print(f"Local Embedding ERROR: {hf_e}")
         return None
     
 async def search_atlas_vector(db, collection_name, query_embedding, filter_dict=None, limit=5):
@@ -115,7 +88,7 @@ async def search_atlas_vector(db, collection_name, query_embedding, filter_dict=
     cursor = db[collection_name].aggregate(pipeline)
     return await cursor.to_list(length=limit)    
 
-# --- 4. Logic Required by Query Routes ---
+#Logic Required by Query Routes
 
 async def detect_subject_relevance(question: str, course_name: str):
     """Checks if the question pertains to the specific course subject."""
