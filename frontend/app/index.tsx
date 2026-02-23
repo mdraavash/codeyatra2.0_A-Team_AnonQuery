@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Animated, Easing } from 'react-native';
+import { StyleSheet, Animated, Easing } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';

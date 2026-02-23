@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2f2f2f' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
 
-  /* Page Header */
+
   pageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 22, fontWeight: '700', color: '#f5f5f5' },
   pageSubtitle: { fontSize: 13, color: '#888', marginTop: 4 },
 
-  /* Empty */
   emptyCard: {
     backgroundColor: '#444444',
     borderRadius: 20,
@@ -174,7 +173,6 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 16, fontWeight: '600', color: '#666' },
   emptySubText: { fontSize: 13, color: '#555' },
 
-  /* FAQ Card */
   faqCard: {
     backgroundColor: '#444444',
     borderRadius: 16,
@@ -201,7 +199,7 @@ const styles = StyleSheet.create({
   faqBadgeText: { fontSize: 11, fontWeight: '700', color: '#f5f5f5', textTransform: 'uppercase' },
   faqQuestion: { fontSize: 15, fontWeight: '600', color: '#f5f5f5', lineHeight: 22 },
 
-  /* Answer section */
+  
   faqAnswerSection: { marginTop: 10 },
   faqDivider: {
     height: 1,

@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 
   screenTitle: { fontSize: 22, fontWeight: '600', color: '#FFF', marginBottom: 16 },
 
-  /* Stats */
+ 
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   statCard: {
     flex: 1,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   statNum: { fontSize: 24, fontWeight: '800' },
   statLabel: { fontSize: 11, color: '#888', marginTop: 4, fontWeight: '600' },
 
-  /* Filter */
+ 
   filterRow: { flexDirection: 'row', gap: 10, marginBottom: 18 },
   chip: {
     paddingHorizontal: 18,
@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: '600', color: '#888' },
   chipTextActive: { color: '#FFF' },
 
-  /* Query Card */
   queryCard: {
     backgroundColor: '#444444',
     borderRadius: 16,

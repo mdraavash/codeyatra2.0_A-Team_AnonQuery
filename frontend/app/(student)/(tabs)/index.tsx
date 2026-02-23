@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2F2F2F' },
   scrollContent: { paddingHorizontal: GRID_PADDING, paddingTop: 8, paddingBottom: 110 },
 
-  /* Header */
+
   headerCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  /* Alert Banner */
+
   alertBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   alertText: { fontSize: 13, color: '#FFD93D', fontWeight: '500' },
 
-  /* Section */
+  
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  /* Empty state */
+  
   emptyCard: {
     backgroundColor: '#444444',
     borderRadius: 16,
@@ -323,7 +323,6 @@ const styles = StyleSheet.create({
   notifDotActive: { backgroundColor: '#6C63FF' },
   notifText: { flex: 1, fontSize: 14, fontWeight: '500', color: '#D1D1D1', letterSpacing: 0.1 },
 
-  /* Course Grid */
   coursesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

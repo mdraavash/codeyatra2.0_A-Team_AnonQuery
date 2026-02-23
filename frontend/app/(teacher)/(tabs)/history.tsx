@@ -51,7 +51,6 @@ export default function TeacherHistory() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { fetchData(); }, [token]));
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
@@ -99,10 +98,7 @@ export default function TeacherHistory() {
                 })
               }
             >
-              {/* Q */}
               <Text style={styles.histQuestion} numberOfLines={2}>{q.question}</Text>
-
-              {/* A preview */}
               <Text style={styles.histAnswer} numberOfLines={2}>{q.answer}</Text>
 
               {/* Footer */}
@@ -133,7 +129,6 @@ const styles = StyleSheet.create({
   screenTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
   screenSub: { fontSize: 13, color: '#888', marginTop: 4, marginBottom: 20 },
 
-  /* History Card */
   histCard: {
     backgroundColor: '#444444',
     borderRadius: 16,
@@ -160,7 +155,6 @@ const styles = StyleSheet.create({
   },
   editHintText: { fontSize: 12, fontWeight: '600', color: '#f5f5f5' },
 
-  /* Empty */
   emptyCard: {
     backgroundColor: '#444444',
     borderRadius: 18,

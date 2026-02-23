@@ -48,7 +48,6 @@ export default function TeacherProfile() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { fetchData(); }, [token]));
 
   const starLabels = ['Poor', 'Below Average', 'Average', 'Good', 'Excellent'];
@@ -138,7 +137,6 @@ const styles = StyleSheet.create({
 
   screenTitle: { fontSize: 22, fontWeight: '600', color: '#FFF', marginBottom: 20 },
 
-  /* Profile Card */
   profileCard: {
     backgroundColor: '#444444',
     borderRadius: 20,
@@ -167,7 +165,6 @@ const styles = StyleSheet.create({
   profileInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   profileInfoText: { fontSize: 14, color: '#FFFFFF' },
 
-  /* Rating */
   ratingCard: {
     backgroundColor: '#444444',
     borderRadius: 20,
@@ -182,7 +179,6 @@ const styles = StyleSheet.create({
   ratingLabel: { fontSize: 14, fontWeight: '600', color: '#e67e22', marginTop: 4 },
   ratingCount: { fontSize: 12, color: '#f2f2f2', marginTop: 8 },
 
-  /* Stats */
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
   statCard: {
     flex: 1,
@@ -199,7 +195,6 @@ const styles = StyleSheet.create({
   statNum: { fontSize: 22, fontWeight: '800' },
   statLabel: { fontSize: 11, color: '#888', marginTop: 4, fontWeight: '600' },
 
-  /* Logout */
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',

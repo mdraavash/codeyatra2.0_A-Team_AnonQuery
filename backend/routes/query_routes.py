@@ -9,7 +9,6 @@ from aimodels import moderate_text
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
-
 def _query_doc(q, anonymous: bool = False) -> QueryResponse:
     return QueryResponse(
         id=str(q["_id"]),
@@ -37,7 +36,6 @@ def _notif_doc(n) -> NotificationResponse:
         read=n.get("read", False),
         created_at=n["created_at"].isoformat() if isinstance(n["created_at"], datetime) else n["created_at"],
     )
-
 
 
 @router.post("/", response_model=QueryResponse, status_code=201)

@@ -48,7 +48,6 @@ export default function MyQueriesScreen() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { fetchQueries(); }, [token]));
 
   const filtered = myQueries.filter((q) => {
@@ -184,8 +183,7 @@ export default function MyQueriesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2f2f2f' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
-
-  /* Page Header */
+ 
   pageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -197,7 +195,6 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
   pageSubtitle: { fontSize: 13, color: '#888', marginTop: 4 },
 
-  /* Stats */
   statsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -215,7 +212,6 @@ const styles = StyleSheet.create({
   statNumber: { fontSize: 24, fontWeight: '800', color: '#f5f5f5' },
   statLabel: { fontSize: 11, color: '#888', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  /* Filters */
   filterRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   filterChip: {
     paddingHorizontal: 18,
@@ -232,7 +228,6 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 13, fontWeight: '600', color: '#888' },
   filterChipTextActive: { color: '#FFF' },
 
-  /* Empty */
   emptyCard: {
     backgroundColor: '#444444',
     borderRadius: 20,
@@ -244,7 +239,6 @@ const styles = StyleSheet.create({
   },
   emptyText: { fontSize: 14, color: '#666' },
 
-  /* Query Card */
   queryCard: {
     backgroundColor: '#444444',
     borderRadius: 16,
@@ -280,7 +274,6 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 11, fontWeight: '700' },
   queryQuestion: { fontSize: 15, fontWeight: '600', color: '#FFFFFF', lineHeight: 22 },
 
-  /* Answer preview */
   queryAnswerPreview: { marginTop: 12 },
   queryAnswer: { fontSize: 14, color: '#888', lineHeight: 20 },
   tapHint: {
@@ -292,7 +285,6 @@ const styles = StyleSheet.create({
   },
   tapHintText: { fontSize: 12, fontWeight: '600', color: '#f5f5f5' },
 
-  /* Pending */
   pendingRow: {
     flexDirection: 'row',
     alignItems: 'center',

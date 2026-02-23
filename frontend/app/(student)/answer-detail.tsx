@@ -32,7 +32,6 @@ export default function AnswerDetail() {
 
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-
   useEffect(() => {
     const checkRating = async () => {
       try {
@@ -109,7 +108,6 @@ export default function AnswerDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Bar */}
       <View style={styles.headerBar}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
           <Ionicons name="arrow-back" size={22} color="#FFF" />
@@ -140,7 +138,6 @@ export default function AnswerDetail() {
           <Text style={styles.answerText}>{answer}</Text>
         </View>
 
-        {/* Divider */}
         <View style={styles.divider} />
 
         {/* Rating Section */}
@@ -203,7 +200,6 @@ export default function AnswerDetail() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2F2F2F' },
 
-  /* Header */
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',

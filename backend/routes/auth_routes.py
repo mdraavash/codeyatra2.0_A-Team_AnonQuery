@@ -2,9 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from models import UserRegister, UserLogin, UserResponse, TokenResponse
 from auth import create_access_token, get_current_user
 from database import get_database
-
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-
 
 @router.post("/register", response_model=TokenResponse)
 async def register(user: UserRegister):

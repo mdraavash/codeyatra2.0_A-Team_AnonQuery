@@ -109,7 +109,7 @@ export default function AskQuestion() {
             />
           </View>
 
-          {/* Spacer */}
+          
           <View style={{ flex: 1 }} />
 
           {/* Submit Button */}
@@ -235,7 +235,6 @@ const styles = StyleSheet.create({
   submitBtnDisabled: { opacity: 0.4 },
   submitBtnText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
 
-  /* Modal */
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',

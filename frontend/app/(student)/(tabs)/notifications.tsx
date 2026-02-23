@@ -178,7 +178,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2f2f2f' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
 
-  /* Page Header */
   pageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -190,7 +189,6 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
   pageSubtitle: { fontSize: 13, color: '#888', marginTop: 4 },
 
-  /* Section */
   sectionLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -214,7 +212,6 @@ const styles = StyleSheet.create({
   },
   countBadgeText: { fontSize: 11, fontWeight: '700', color: '#FFF' },
 
-  /* Empty */
   emptyCard: {
     backgroundColor: '#444444',
     borderRadius: 20,
@@ -227,7 +224,6 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 16, fontWeight: '600', color: '#666' },
   emptySubText: { fontSize: 13, color: '#555' },
 
-  /* Notification Card */
   notifCard: {
     flexDirection: 'row',
     alignItems: 'center',

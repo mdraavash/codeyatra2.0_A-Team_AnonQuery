@@ -35,10 +35,7 @@ export default function LoginPage() {
       easing: Easing.out(Easing.exp),
       useNativeDriver: true,
     }),
-    
     Animated.delay(800),
-
-    
     Animated.timing(logoTranslateY, {
       toValue: -80,
       duration: 700,
@@ -94,17 +91,6 @@ export default function LoginPage() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-{/*       
-      Animated Logo
-      <Animated.Image
-        source={require('@/assets/images/Grouplogo.png')}
-        style={[
-          styles.logo,
-          { transform: [{ translateY: logoTranslateY }] },
-        ]}
-        resizeMode="contain"
-      /> */}
-
       <Animated.View
         style={[
           styles.inner,

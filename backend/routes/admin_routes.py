@@ -7,11 +7,9 @@ from models import UserRegister, UserResponse, CourseCreate, CourseResponse
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
-
 def _require_admin(current_user):
     if current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
-
 
 #teacher list
 @router.get("/teachers", response_model=list[dict])
@@ -31,7 +29,6 @@ async def list_teachers(current_user=Depends(get_current_user)):
         }
         for t in teachers
     ]
-
 
 # create teacher account
 @router.post("/teachers", response_model=UserResponse, status_code=201)
@@ -54,7 +51,6 @@ async def create_teacher(body: UserRegister, current_user=Depends(get_current_us
         roll=doc.get("roll", ""),
         role="teacher",
     )
-
 
 # subject create and assign teacher
 @router.post("/subjects", response_model=CourseResponse, status_code=201)
@@ -80,7 +76,6 @@ async def create_subject(body: CourseCreate, current_user=Depends(get_current_us
         teacher_id=doc["teacher_id"],
         teacher_name=doc["teacher_name"],
     )
-
 
 # subject list
 @router.get("/subjects", response_model=list[CourseResponse])
@@ -174,9 +169,7 @@ async def delete_student(student_id: str, current_user=Depends(get_current_user)
     await db["queries"].delete_many({"student_id": student_id})
     return {"message": "Student and their queries deleted"}
 
-
-# ── All Queries (with real names) ──
-
+#All queries
 @router.get("/queries", response_model=list[dict])
 async def list_all_queries(current_user=Depends(get_current_user)):
     _require_admin(current_user)

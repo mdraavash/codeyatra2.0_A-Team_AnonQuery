@@ -40,7 +40,6 @@ class CourseResponse(BaseModel):
     teacher_name: str
 
 
-
 class QueryCreate(BaseModel):
     course_id: str
     question: str
@@ -61,7 +60,6 @@ class QueryResponse(BaseModel):
     created_at: str
     answered_at: Optional[str] = None
     teacher_id: str = ""
-
 
 
 class NotificationResponse(BaseModel):

@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#2F2F2F' },
   scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
 
-  /* Header */
   headerCard: {
     backgroundColor: '#444444',
     borderRadius: 20,
@@ -218,7 +217,6 @@ const styles = StyleSheet.create({
   headerName: { fontSize: 22, fontWeight: '600', color: '#FFFFFF', lineHeight: 33 },
   headerSub: { fontSize: 12, color: '#FFFFFF', marginTop: 2, letterSpacing: 0.18 },
 
-  /* Alert */
   alertBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -244,7 +242,6 @@ const styles = StyleSheet.create({
   },
   alertText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#f2f2f2' },
 
-  /* Section */
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
@@ -254,7 +251,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  /* Notification */
   notifCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -278,7 +274,6 @@ const styles = StyleSheet.create({
   notifDotActive: { backgroundColor: '#54e0a8' },
   notifText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#f2f2f2', letterSpacing: 0.21 },
 
-  /* Subjects Grid */
   subjectsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -307,7 +302,6 @@ const styles = StyleSheet.create({
   },
   subjectName: { fontSize: 14, fontWeight: '600', color: '#f2f2f2', textAlign: 'center' },
 
-  /* Empty */
   emptyCard: {
     backgroundColor: '#444444',
     borderRadius: 16,
