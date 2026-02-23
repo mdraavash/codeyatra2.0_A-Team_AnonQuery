@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     columnGap: COL_GAP,
-    rowGap: 5,
+    rowGap: 15,
   },
   courseCard: {
     width: CARD_WIDTH,

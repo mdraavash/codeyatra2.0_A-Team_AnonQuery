@@ -25,37 +25,40 @@ export default function LoginPage() {
   const logoTranslateY = useRef(new Animated.Value(0)).current;
   const formOpacity = useRef(new Animated.Value(0)).current;
   const formTranslateY = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
+useEffect(() => {
   Animated.sequence([
-
+    // Initial quick pop of the logo
     Animated.timing(logoTranslateY, {
       toValue: -50,
-      duration: 600,
-      easing: Easing.out(Easing.exp),
+      duration: 250, // Reduced from 400
+      easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }),
-    Animated.delay(800),
-    Animated.timing(logoTranslateY, {
-      toValue: -80,
-      duration: 700,
-      easing: Easing.out(Easing.exp),
-      useNativeDriver: true,
-    }),
+    
+    Animated.delay(200), 
 
     
-    Animated.delay(200),
+    Animated.timing(logoTranslateY, {
+      toValue: -80,
+      duration: 400, 
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }),
 
+
+    Animated.delay(100), 
+
+ 
     Animated.parallel([
       Animated.timing(formOpacity, {
         toValue: 1,
-        duration: 600,
+        duration: 300, 
         useNativeDriver: true,
       }),
       Animated.timing(formTranslateY, {
         toValue: 0,
-        duration: 600,
-        easing: Easing.out(Easing.exp),
+        duration: 400, 
+        easing: Easing.out(Easing.back(1)), 
         useNativeDriver: true,
       }),
     ]),

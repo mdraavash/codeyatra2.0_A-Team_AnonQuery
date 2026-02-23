@@ -81,17 +81,11 @@ const styles = StyleSheet.create({
   navBar: {
     height: 68,
     borderRadius: 34,
-    backgroundColor: 'rgba(26, 26, 46, 0.92)',
-    borderWidth: 0,
+    backgroundColor: '#444444',
     opacity: 0.9,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
     elevation: 12,
   },
   navItem: {
