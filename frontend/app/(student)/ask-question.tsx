@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',

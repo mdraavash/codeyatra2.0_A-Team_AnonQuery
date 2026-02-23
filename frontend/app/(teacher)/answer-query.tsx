@@ -153,8 +153,8 @@ export default function AnswerQuery() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2F2F2F' },
-  scrollContent: { paddingHorizontal: 17, paddingTop: 60, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#2f2f2f' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 80, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
@@ -175,10 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
     marginBottom: 8,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,

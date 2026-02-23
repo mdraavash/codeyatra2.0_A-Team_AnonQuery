@@ -115,7 +115,7 @@ export default function TeacherHistory() {
 
               {/* Edit hint */}
               <View style={styles.editHintRow}>
-                <Ionicons name="create-outline" size={14} color="#0A3B87" />
+                <Ionicons name="create-outline" size={14} color="#f2f2f2" />
                 <Text style={styles.editHintText}>Edit Your Answer</Text>
               </View>
             </TouchableOpacity>
@@ -135,17 +135,13 @@ const styles = StyleSheet.create({
 
   /* History Card */
   histCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 18,
     marginBottom: 14,
-    shadowColor: '#C4C4C4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 3,
   },
-  histQuestion: { fontSize: 15, fontWeight: '700', color: '#2F2F2F', lineHeight: 22, marginBottom: 8 },
+  histQuestion: { fontSize: 15, fontWeight: '700', color: '#f2f2f2', lineHeight: 22, marginBottom: 8 },
   histAnswer: { fontSize: 13, color: '#888', lineHeight: 20, marginBottom: 12 },
   histFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   histCourseBadge: {
@@ -155,23 +151,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   histCourseBadgeText: { fontSize: 11, fontWeight: '700', color: '#FFF' },
-  histDate: { fontSize: 11, color: '#B7B7B7' },
+  histDate: { fontSize: 11, color: '#f2f2f2' },
   editHintRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     alignSelf: 'flex-end',
   },
-  editHintText: { fontSize: 12, fontWeight: '600', color: '#0A3B87' },
+  editHintText: { fontSize: 12, fontWeight: '600', color: '#f5f5f5' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#444444',
     borderRadius: 18,
     padding: 48,
     alignItems: 'center',
     marginTop: 20,
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#2F2F2F', marginTop: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#f2f2f2', marginTop: 16 },
   emptyText: { fontSize: 13, color: '#888', marginTop: 6 },
 });

@@ -13,7 +13,7 @@ const Index = () => {
   useEffect(() => {
     // Start animation
     Animated.timing(translateY, {
-      toValue: -150, // 👈 how far upward it moves
+      toValue: -150,
       duration: 1000,
       easing: Easing.out(Easing.exp),
       useNativeDriver: true,
@@ -46,7 +46,7 @@ const Index = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Animated.Image
-        source={require('@/assets/images/logo.png')}
+        source={require('@/assets/images/Grouplogo.png')}
         style={[
           styles.logo,
           { transform: [{ translateY }] }
