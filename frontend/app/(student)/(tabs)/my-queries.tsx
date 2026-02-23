@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   filterChipActive: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#444444',
     borderColor: '#f5f5f5',
   },
   filterChipText: { fontSize: 13, fontWeight: '600', color: '#888' },

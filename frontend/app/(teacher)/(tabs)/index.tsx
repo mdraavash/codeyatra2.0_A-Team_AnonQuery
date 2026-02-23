@@ -63,7 +63,6 @@ export default function TeacherHome() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { fetchData(); }, [token]));
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
@@ -118,7 +117,7 @@ export default function TeacherHome() {
             }}
           >
             <View style={styles.alertIconWrap}>
-              <Ionicons name="notifications" size={18} color="#FFD700" />
+              <Ionicons name="notifications" size={18} color="#54e0a8" />
             </View>
             <Text style={styles.alertText}>
               You have {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
