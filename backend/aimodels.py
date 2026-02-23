@@ -121,6 +121,98 @@ def contains_custom_profanity(text):
             return True
     return False
 
+def cluster_questions(question_list):
+    """
+    Takes a list of SAFE questions and groups them into topics using Gemini.
+    """
+
+    if not question_list:
+        return []
+
+    prompt = f"""
+You are an AI classroom assistant.
+
+Group the following student questions into logical topic clusters.
+
+Return ONLY valid JSON in this format:
+
+[
+  {{
+    "topic": "Topic Name",
+    "questions": ["question1", "question2"]
+  }}
+]
+
+Questions:
+{question_list}
+"""
+
+    try:
+        response = llm.invoke(prompt)
+        content = response.content.strip()
+
+        # Clean markdown if exists
+        if content.startswith("```"):
+            content = content.replace("```json", "")
+            content = content.replace("```", "")
+            content = content.strip()
+
+        return json.loads(content)
+
+    except Exception as e:
+        print("Clustering Error:", e)
+        return []
+    
+
+def detect_emotion(text):
+    """
+    Detect emotional tone of a student question.
+    """
+
+    prompt = f"""
+You are an AI emotion detection system for classroom analytics.
+
+Classify the emotional tone of this message into ONE of:
+
+CONFUSED
+FRUSTRATED
+CURIOUS
+ANXIOUS
+NEUTRAL
+
+Message:
+"{text}"
+
+Return ONLY valid JSON:
+{{
+  "emotion": "CONFUSED",
+  "confidence": 0.85
+}}
+"""
+
+    try:
+        response = llm.invoke(prompt)
+        content = response.content.strip()
+
+        # Clean markdown if exists
+        if content.startswith("```"):
+            content = content.replace("```json", "")
+            content = content.replace("```", "")
+            content = content.strip()
+
+        parsed = json.loads(content)
+
+        return {
+            "emotion": parsed.get("emotion", "NEUTRAL"),
+            "confidence": float(parsed.get("confidence", 0))
+        }
+
+    except Exception as e:
+        print("Emotion Detection Error:", e)
+        return {
+            "emotion": "NEUTRAL",
+            "confidence": 0
+        }
 
 def moderate_text(text):
     spam_score = rule_based_spam_score(text)
@@ -156,11 +248,66 @@ def moderate_text(text):
         "blocked": blocked,
         "source": "llm"
     }
+    
+def process_classroom_questions(question_list):
+    """
+    Full AI pipeline:
+    - Moderate each question
+    - Detect emotion (if safe)
+    - Cluster safe questions
+    - Return analytics
+    """
+
+    safe_questions = []
+    moderation_results = []
+    emotion_summary = {
+        "CONFUSED": 0,
+        "FRUSTRATED": 0,
+        "CURIOUS": 0,
+        "ANXIOUS": 0,
+        "NEUTRAL": 0
+    }
+
+    for q in question_list:
+        mod_result = moderate_text(q)
+
+        question_data = {
+            "question": q,
+            "moderation": mod_result
+        }
+
+        if not mod_result["blocked"]:
+            emotion = detect_emotion(q)
+            question_data["emotion"] = emotion
+
+            safe_questions.append(q)
+
+            if emotion["emotion"] in emotion_summary:
+                emotion_summary[emotion["emotion"]] += 1
+
+        moderation_results.append(question_data)
+
+    clusters = cluster_questions(safe_questions)
+
+    return {
+        "moderation_results": moderation_results,
+        "clusters": clusters,
+        "emotion_summary": emotion_summary
+    }
 
 # -----------------------------
 # Test run
 # -----------------------------
 if __name__ == "__main__":
-    test_message = "Hello Teacher muji"
-    result = moderate_text(test_message)
-    print("Final Result:", result)
+    questions = [
+        "What is recursion?",
+        "I still don't understand recursion base case",
+        "Why is this so confusing?",
+        "Can you explain stack again?",
+        "Hello teacher muji",
+        "Buy crypto now http://spam.com"
+    ]
+
+    result = process_classroom_questions(questions)
+
+    print(json.dumps(result, indent=2))
